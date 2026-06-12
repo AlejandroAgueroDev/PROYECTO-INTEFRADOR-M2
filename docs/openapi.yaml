@@ -1,0 +1,343 @@
+openapi: 3.0.3
+info:
+  title: MiniBlog API
+  description: API REST para gestionar autores y publicaciones — DevSpark MiniBlog
+  version: 1.0.0
+  contact:
+    name: DevSpark
+
+servers:
+  - url: http://localhost:3000
+    description: Local
+  - url: https://your-app.up.railway.app
+    description: Railway Production
+
+tags:
+  - name: Authors
+  - name: Posts
+  - name: Comments
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: API is running
+
+  # ── AUTHORS ────────────────────────────────────────────────────────────
+  /authors:
+    get:
+      tags: [Authors]
+      summary: Listar todos los autores
+      responses:
+        "200":
+          description: Lista de autores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Author"
+    post:
+      tags: [Authors]
+      summary: Crear un autor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthorInput"
+      responses:
+        "201":
+          description: Autor creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /authors/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Authors]
+      summary: Obtener autor por ID
+      responses:
+        "200":
+          description: Autor encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Authors]
+      summary: Actualizar autor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthorInput"
+      responses:
+        "200":
+          description: Autor actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Authors]
+      summary: Eliminar autor
+      responses:
+        "204":
+          description: Eliminado correctamente
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── POSTS ──────────────────────────────────────────────────────────────
+  /posts:
+    get:
+      tags: [Posts]
+      summary: Listar todos los posts
+      responses:
+        "200":
+          description: Lista de posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostWithAuthor"
+    post:
+      tags: [Posts]
+      summary: Crear un post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "201":
+          description: Post creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /posts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Posts]
+      summary: Obtener post por ID (incluye datos del autor)
+      responses:
+        "200":
+          description: Post encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostWithAuthor"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Posts]
+      summary: Actualizar post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "200":
+          description: Post actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Posts]
+      summary: Eliminar post
+      responses:
+        "204":
+          description: Eliminado correctamente
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /posts/author/{authorId}:
+    parameters:
+      - name: authorId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Posts]
+      summary: Posts por autor (con datos del autor)
+      responses:
+        "200":
+          description: Lista de posts del autor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostWithAuthor"
+
+  # ── COMMENTS ──────────────────────────────────────────────────────────
+  /comments:
+    post:
+      tags: [Comments]
+      summary: Crear un comentario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Comentario creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /comments/post/{postId}:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Comments]
+      summary: Comentarios de un post
+      responses:
+        "200":
+          description: Lista de comentarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+
+  /comments/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    delete:
+      tags: [Comments]
+      summary: Eliminar comentario
+      responses:
+        "204":
+          description: Eliminado correctamente
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    Author:
+      type: object
+      properties:
+        id:         { type: integer }
+        name:       { type: string }
+        email:      { type: string, format: email }
+        bio:        { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    AuthorInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:  { type: string }
+        email: { type: string, format: email }
+        bio:   { type: string }
+
+    Post:
+      type: object
+      properties:
+        id:         { type: integer }
+        title:      { type: string }
+        content:    { type: string }
+        author_id:  { type: integer }
+        published:  { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    PostWithAuthor:
+      allOf:
+        - $ref: "#/components/schemas/Post"
+        - type: object
+          properties:
+            author_name:  { type: string }
+            author_email: { type: string }
+            author_bio:   { type: string, nullable: true }
+
+    PostInput:
+      type: object
+      required: [title, content, author_id]
+      properties:
+        title:     { type: string }
+        content:   { type: string }
+        author_id: { type: integer }
+        published: { type: boolean, default: false }
+
+    Comment:
+      type: object
+      properties:
+        id:           { type: integer }
+        content:      { type: string }
+        post_id:      { type: integer }
+        author_id:    { type: integer }
+        author_name:  { type: string }
+        author_email: { type: string }
+        created_at:   { type: string, format: date-time }
+
+    CommentInput:
+      type: object
+      required: [post_id, author_id, content]
+      properties:
+        post_id:   { type: integer }
+        author_id: { type: integer }
+        content:   { type: string }
+
+  responses:
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }

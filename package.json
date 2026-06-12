@@ -1,0 +1,33 @@
+{
+  "name": "miniblog-api",
+  "version": "1.0.0",
+  "description": "API REST para MiniBlog - DevSpark",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "supertest": "^7.2.2",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
+  },
+  "vitest": {
+    "test": {
+      "environment": "node",
+      "testTimeout": 10000
+    }
+  }
+}
