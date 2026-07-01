@@ -2,9 +2,12 @@
 const errorHandler = (err, req, res, next) => {
   console.error(`[ERROR] ${req.method} ${req.path}:`, err.message);
 
-  // PostgreSQL specific error codes
   if (err.code === '22P02') {
     return res.status(400).json({ error: 'Formato de ID invalido' });
+  }
+
+  if (err.code === '23505') {
+    return res.status(409).json({ error: 'Recurso duplicado' });
   }
 
   const status = err.status || 500;

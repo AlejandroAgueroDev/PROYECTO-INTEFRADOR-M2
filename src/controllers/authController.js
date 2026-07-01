@@ -1,13 +1,17 @@
 import { login as loginService } from '../services/authServices.js';
+import { loginSchema, parseWithSchema } from '../utils/validation.js';
 
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const parsed = parseWithSchema(loginSchema, req.body);
 
-    if (!email || !email.trim()) return res.status(400).json({ error: 'email es requerido' });
-    if (!password) return res.status(400).json({ error: 'password es requerido' });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
+    }
 
-    const token = await loginService(email.trim(), password);
+    const { email, password } = parsed.data;
+
+    const token = await loginService(email, password);
 
     if (!token) return res.status(401).json({ error: 'Credenciales inválidas' });
 

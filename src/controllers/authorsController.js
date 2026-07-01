@@ -5,6 +5,7 @@ import {
   updateAuthor,
   deleteAuthor,
 } from "../services/authorsServices.js";
+import { authorCreateSchema, authorUpdateSchema, parseWithSchema } from "../utils/validation.js";
 
 const getAll = async (req, res, next) => {
   try {
@@ -27,16 +28,17 @@ const getById = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { name, email, bio } = req.body;
+    const parsed = parseWithSchema(authorCreateSchema, req.body);
 
-    if (!name || !name.trim())
-      return res.status(400).json({ error: "nombre es requerido" });
-    if (!email || !email.trim())
-      return res.status(400).json({ error: "email es requerido" });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
+    }
+
+    const { name, email, bio } = parsed.data;
 
     const author = await createAuthor({
-      name: name.trim(),
-      email: email.trim(),
+      name,
+      email,
       bio,
     });
     res.status(201).json(author);
@@ -49,12 +51,13 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const { name, email, bio } = req.body;
+    const parsed = parseWithSchema(authorUpdateSchema, req.body);
 
-    if (name !== undefined && !name.trim())
-      return res.status(400).json({ error: "El nombre no puede estar vacio" });
-    if (email !== undefined && !email.trim())
-      return res.status(400).json({ error: "El email no puede estar vacio" });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
+    }
+
+    const { name, email, bio } = parsed.data;
 
     const author = await updateAuthor(req.params.id, {
       name,

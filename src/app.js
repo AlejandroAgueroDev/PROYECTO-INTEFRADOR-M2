@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 //todo RUTAS
 import authRouter from "./routes/auth.js";
@@ -13,10 +15,34 @@ import errorHandler from "./middlewares/errorHandler.js";
 import notFound from "./middlewares/notFound.js";
 
 const app = express();
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ── Middlewares globales ──────────────────────────────────────────────────────
-app.use(cors());
-app.use(express.json());
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  }),
+);
+app.use(express.json({ limit: "100kb" }));
+app.use(apiLimiter);
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  next();
+});
 
 // ── Health check (público) ────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
@@ -24,6 +50,7 @@ app.get("/health", (req, res) => {
 });
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
+app.use("/auth/login", authLimiter);
 app.use("/auth", authRouter);
 
 // ── Rutas protegidas ──────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import {
   updatePost,
   deletePost,
 } from "../services/postsServices.js";
+import { postCreateSchema, postUpdateSchema, parseWithSchema } from "../utils/validation.js";
 
 const getAll = async (req, res, next) => {
   try {
@@ -37,18 +38,17 @@ const getByAuthorId = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { title, content, author_id, published } = req.body;
+    const parsed = parseWithSchema(postCreateSchema, req.body);
 
-    if (!title || !title.trim())
-      return res.status(400).json({ error: "title es requerido" });
-    if (!content || !content.trim())
-      return res.status(400).json({ error: "content es requerido" });
-    if (!author_id)
-      return res.status(400).json({ error: "author_id es requerido" });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
+    }
+
+    const { title, content, author_id, published } = parsed.data;
 
     const post = await createPost({
-      title: title.trim(),
-      content: content.trim(),
+      title,
+      content,
       author_id,
       published,
     });
@@ -62,12 +62,13 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const { title, content, author_id, published } = req.body;
+    const parsed = parseWithSchema(postUpdateSchema, req.body);
 
-    if (title !== undefined && !title.trim())
-      return res.status(400).json({ error: "title no puede estar vacio" });
-    if (content !== undefined && !content.trim())
-      return res.status(400).json({ error: "content no puede estar vacio" });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
+    }
+
+    const { title, content, author_id, published } = parsed.data;
 
     const post = await updatePost(req.params.id, {
       title,

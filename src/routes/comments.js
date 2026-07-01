@@ -1,5 +1,9 @@
 import express from "express";
-import { getByPostId, create, remove } from "../controllers/commentsController.js";
+import {
+  getByPostId,
+  create,
+  remove,
+} from "../controllers/commentsController.js";
 
 const router = express.Router();
 

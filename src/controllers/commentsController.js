@@ -1,4 +1,5 @@
 import { getCommentsByPostId, createComment, deleteComment } from '../services/commentsServices.js';
+import { commentCreateSchema, parseWithSchema } from '../utils/validation.js';
 
 const getByPostId = async (req, res, next) => {
   try {
@@ -11,13 +12,15 @@ const getByPostId = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { post_id, author_id, content } = req.body;
+    const parsed = parseWithSchema(commentCreateSchema, req.body);
 
-    if (!post_id) return res.status(400).json({ error: 'post_id es requerido' });
-    if (!author_id) return res.status(400).json({ error: 'author_id es requerido' });
-    if (!content || !content.trim()) return res.status(400).json({ error: 'content es requerido' });
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error });
+    }
 
-    const comment = await createComment({ post_id, author_id, content: content.trim() });
+    const { post_id, author_id, content } = parsed.data;
+
+    const comment = await createComment({ post_id, author_id, content });
     res.status(201).json(comment);
   } catch (err) {
     if (err.code === '23503') return res.status(400).json({ error: 'post_id o author_id no existen' });

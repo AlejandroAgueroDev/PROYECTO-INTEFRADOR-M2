@@ -2,7 +2,7 @@ import "dotenv/config.js";
 import app from "./app.js";
 import { seedAdminUser } from "./services/authServices.js";
 
-const PORT = process.env.PORT ;
+const PORT = process.env.PORT;
 
 app.listen(PORT, async () => {
   console.log(`🚀 MiniBlog API corriendo en puerto ${PORT}`);
@@ -12,7 +12,7 @@ app.listen(PORT, async () => {
   try {
     await seedAdminUser();
   } catch (err) {
-    console.error('❌ Error al crear usuario admin:', err.message);
+    console.error("❌ Error al crear usuario admin:", err.message);
   }
 });
 

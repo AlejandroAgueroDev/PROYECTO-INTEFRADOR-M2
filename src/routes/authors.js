@@ -1,14 +1,20 @@
-import express from 'express';
-import { getAll, getById, create, update, remove } from '../controllers/authorsController.js';
+import express from "express";
+import {
+  getAll,
+  getById,
+  create,
+  update,
+  remove,
+} from "../controllers/authorsController.js";
 
 const router = express.Router();
 
 // ── Rutas de autores──────────────────────────────────────
-router.get('/',     getAll);
-router.get('/:id',  getById);
-router.post('/',    create);
-router.put('/:id',  update);
-router.delete('/:id', remove);
+router.get("/", getAll);
+router.get("/:id", getById);
+router.post("/", create);
+router.put("/:id", update);
+router.delete("/:id", remove);
 
 export default router;
 
